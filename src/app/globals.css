@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "katex/dist/katex.min.css";
+
+:root {
+  --background: #0D0D14;
+  --foreground: #F1F1F5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Inter, Arial, Helvetica, sans-serif;
+}
+
+input,
+select,
+textarea {
+  color-scheme: dark;
+}
