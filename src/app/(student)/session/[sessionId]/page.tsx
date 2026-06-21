@@ -169,7 +169,11 @@ export default function SessionPage({ params }: { params: { sessionId: string } 
                 <article key={material.id} className="rounded-lg border border-[#7C6FFF] bg-[#0D0D14] p-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <h3 className="font-semibold text-[#B8B2FF]">Targeted notes from {material.name}</h3>
-                    <a href={material.url} target="_blank" className="text-sm font-semibold text-[#7C6FFF]">Open full file</a>
+                    {(material.url.startsWith("/uploads/") || material.url.startsWith("http")) && (
+                      <a href={material.url} target="_blank" className="text-sm font-semibold text-[#7C6FFF]">
+                        Open full file
+                      </a>
+                    )}
                   </div>
                   <div className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[#F1F1F5]">
                     <MathRenderer text={material.excerpt} />

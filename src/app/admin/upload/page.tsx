@@ -94,9 +94,11 @@ function UploadForm({ type, title }: { type: "question_bank" | "study_material";
           <p className="mt-1 text-xs text-[#B8BBC7]">
             Students will see only targeted excerpts after weak-area analysis, not the whole notes.
           </p>
-          <a className="mt-2 inline-flex text-sm font-semibold text-[#7C6FFF]" href={result.storagePath} target="_blank">
-            Open uploaded material
-          </a>
+          {result.storagePath.startsWith("/uploads/") && (
+            <a className="mt-2 inline-flex text-sm font-semibold text-[#7C6FFF]" href={result.storagePath} target="_blank">
+              Open uploaded material
+            </a>
+          )}
         </div>
       )}
       {type === "question_bank" && result?.previewQuestions && result.previewQuestions.length > 0 && (

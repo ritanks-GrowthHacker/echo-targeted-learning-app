@@ -47,9 +47,14 @@ export async function POST(req: Request) {
   const bytes = Buffer.from(await file.arrayBuffer());
   const ext = format === "word" ? "docx" : format === "pdf" ? "pdf" : path.extname(file.name).replace(".", "") || "png";
   const filename = `${randomUUID()}.${ext}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadDir, { recursive: true });
-  await writeFile(path.join(uploadDir, filename), bytes);
+  const isVercel = Boolean(process.env.VERCEL);
+  const storagePath = isVercel ? `indexed://${filename}` : `/uploads/${filename}`;
+
+  if (!isVercel) {
+    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    await mkdir(uploadDir, { recursive: true });
+    await writeFile(path.join(uploadDir, filename), bytes);
+  }
 
   const [upload] = await db
     .insert(uploads)
@@ -58,7 +63,7 @@ export async function POST(req: Request) {
       uploadType,
       fileFormat: format,
       originalName: file.name,
-      storagePath: `/uploads/${filename}`,
+      storagePath,
       conceptId,
     })
     .returning();
