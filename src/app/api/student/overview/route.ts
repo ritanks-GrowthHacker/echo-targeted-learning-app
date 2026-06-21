@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { concepts, practiceSessions, questions, sessionAttempts, studentMastery } from "@/lib/db/schema";
+import { concepts, practiceSessions, questions, sessionAttempts } from "@/lib/db/schema";
 import { getStudentProgress } from "@/lib/db/queries/mastery";
 import { percent, toNumber } from "@/lib/utils";
 

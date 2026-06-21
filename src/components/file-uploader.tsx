@@ -31,6 +31,7 @@ export function FileUploader({ name = "file" }: { name?: string }) {
       </label>
       {file && previewUrl && (
         <div className="mt-4 overflow-hidden rounded-lg border border-[#1E1E30] bg-[#0D0D14]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           {file.type.startsWith("image/") && <img src={previewUrl} alt={file.name} className="max-h-72 w-full object-contain" />}
           {file.type === "application/pdf" && <iframe src={previewUrl} title={file.name} className="h-72 w-full" />}
           {!file.type.startsWith("image/") && file.type !== "application/pdf" && (

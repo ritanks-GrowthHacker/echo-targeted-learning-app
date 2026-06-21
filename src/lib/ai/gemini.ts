@@ -92,13 +92,6 @@ function parseJsonArray(raw: string) {
   return JSON.parse(cleaned.slice(start, end + 1)) as ExtractedMCQ[];
 }
 
-function inferDifficulty(stem: string): "easy" | "medium" | "hard" {
-  const lower = stem.toLowerCase();
-  if (/[0-9]/.test(stem) || lower.includes("graph") || lower.includes("relative")) return "medium";
-  if (lower.includes("projectile") || lower.includes("successive") || lower.includes("braking")) return "hard";
-  return "easy";
-}
-
 async function solveLocalQuestion(
   question: { stem: string; options: Array<{ key: "A" | "B" | "C" | "D"; text: string }> },
   conceptSlug: string,

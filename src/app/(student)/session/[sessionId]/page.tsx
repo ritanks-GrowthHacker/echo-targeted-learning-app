@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { QuestionCard, type ClientQuestion } from "@/components/question-card";
 import { FeedbackPanel } from "@/components/feedback-panel";
 import { MathRenderer } from "@/components/math-renderer";
@@ -74,6 +74,22 @@ export default function SessionPage({ params }: { params: { sessionId: string } 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const answer = useCallback(
+    async (key: string) => {
+      if (!question) return;
+      setSelectedKey(key);
+      const response = await fetch(`/api/sessions/${params.sessionId}/answer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ questionId: question.id, selectedKey: key, phase }),
+      });
+      const data = await response.json();
+      setResult(data);
+      setAnswered((count) => count + 1);
+    },
+    [params.sessionId, phase, question],
+  );
+
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (!question || result || loading || report) return;
@@ -96,20 +112,7 @@ export default function SessionPage({ params }: { params: { sessionId: string } 
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [question, result, loading, report, phase]);
-
-  async function answer(key: string) {
-    if (!question) return;
-    setSelectedKey(key);
-    const response = await fetch(`/api/sessions/${params.sessionId}/answer`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ questionId: question.id, selectedKey: key, phase }),
-    });
-    const data = await response.json();
-    setResult(data);
-    setAnswered((count) => count + 1);
-  }
+  }, [answer, question, result, loading, report, phase]);
 
   function startRetest() {
     setPhase("retest");
