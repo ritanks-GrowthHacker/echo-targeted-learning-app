@@ -103,7 +103,14 @@ async function main() {
     ALTER TABLE concepts ALTER COLUMN slug SET NOT NULL;
     ALTER TABLE concepts ALTER COLUMN title SET NOT NULL;
     ALTER TABLE concepts ALTER COLUMN order_index SET NOT NULL;
-    ALTER TABLE concepts ALTER COLUMN topic_id DROP NOT NULL;
+    DO $$ BEGIN
+      IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'concepts' AND column_name = 'topic_id'
+      ) THEN
+        EXECUTE 'ALTER TABLE concepts ALTER COLUMN topic_id DROP NOT NULL';
+      END IF;
+    END $$;
     CREATE UNIQUE INDEX IF NOT EXISTS concepts_slug_unique ON concepts(slug);
 
     CREATE TABLE IF NOT EXISTS misconceptions (id uuid PRIMARY KEY DEFAULT gen_random_uuid());
@@ -152,7 +159,14 @@ async function main() {
     ALTER TABLE practice_sessions ADD COLUMN IF NOT EXISTS phase text DEFAULT 'diagnostic';
     ALTER TABLE practice_sessions ADD COLUMN IF NOT EXISTS started_at timestamptz DEFAULT now();
     ALTER TABLE practice_sessions ADD COLUMN IF NOT EXISTS completed_at timestamptz;
-    ALTER TABLE practice_sessions ALTER COLUMN topic_id DROP NOT NULL;
+    DO $$ BEGIN
+      IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'practice_sessions' AND column_name = 'topic_id'
+      ) THEN
+        EXECUTE 'ALTER TABLE practice_sessions ALTER COLUMN topic_id DROP NOT NULL';
+      END IF;
+    END $$;
 
     CREATE TABLE IF NOT EXISTS session_attempts (id uuid PRIMARY KEY DEFAULT gen_random_uuid());
     ALTER TABLE session_attempts ADD COLUMN IF NOT EXISTS session_id uuid REFERENCES practice_sessions(id) ON DELETE CASCADE;
