@@ -10,6 +10,9 @@ type UploadResult = {
   error?: string;
   message?: string;
   questionsExtracted?: number;
+  questionsParsed?: number;
+  duplicatesSkipped?: number;
+  invalidSkipped?: number;
   storagePath?: string;
   originalName?: string;
   notesIndexed?: boolean;
@@ -87,6 +90,26 @@ function UploadForm({ type, title }: { type: "question_bank" | "study_material";
         <p className={`mt-3 text-sm ${result?.success === false ? "text-[#EF4444]" : "text-[#B8BBC7]"}`}>
           {message}
         </p>
+      )}
+      {type === "question_bank" && result?.success && (
+        <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+          <div className="rounded-lg border border-[#1E1E30] bg-[#0D0D14] p-3">
+            <p className="text-[#6B7280]">Parsed</p>
+            <p className="mt-1 text-lg font-semibold text-[#F1F1F5]">{result.questionsParsed ?? 0}</p>
+          </div>
+          <div className="rounded-lg border border-[#22C55E]/30 bg-[#12301f] p-3">
+            <p className="text-[#86EFAC]">New added</p>
+            <p className="mt-1 text-lg font-semibold text-[#F1F1F5]">{result.questionsExtracted ?? 0}</p>
+          </div>
+          <div className="rounded-lg border border-[#F59E0B]/30 bg-[#2a1d08] p-3">
+            <p className="text-[#FCD34D]">Duplicates</p>
+            <p className="mt-1 text-lg font-semibold text-[#F1F1F5]">{result.duplicatesSkipped ?? 0}</p>
+          </div>
+          <div className="rounded-lg border border-[#EF4444]/30 bg-[#2b1118] p-3">
+            <p className="text-[#FCA5A5]">Invalid</p>
+            <p className="mt-1 text-lg font-semibold text-[#F1F1F5]">{result.invalidSkipped ?? 0}</p>
+          </div>
+        </div>
       )}
       {result?.storagePath && type === "study_material" && (
         <div className="mt-3 rounded-lg border border-[#22C55E]/30 bg-[#12301f] p-3">

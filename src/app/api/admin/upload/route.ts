@@ -70,6 +70,9 @@ export async function POST(req: Request) {
 
   let extractedText = "";
   let questionsExtracted = 0;
+  let questionsParsed = 0;
+  let duplicatesSkipped = 0;
+  let invalidSkipped = 0;
   const previewQuestions: Array<{
     id: string;
     stem: string;
@@ -104,6 +107,7 @@ export async function POST(req: Request) {
     if (!extracted.length) {
       extracted = extractedText ? await extractMCQFromText(extractedText, concept.slug).catch(() => []) : [];
     }
+    questionsParsed = extracted.length;
 
     const [mcA, mcB] = await db.query.misconceptions.findMany({
       where: (m, { eq }) => eq(m.conceptId, conceptId),
@@ -113,13 +117,22 @@ export async function POST(req: Request) {
     for (const item of extracted) {
       const correctKey = String(item.correct_key ?? "").toUpperCase();
       const difficulty = item.difficulty;
-      if (!["A", "B", "C", "D"].includes(correctKey) || item.options.length !== 4) continue;
-      if (!["easy", "medium", "hard"].includes(difficulty)) continue;
+      if (!["A", "B", "C", "D"].includes(correctKey) || item.options.length !== 4) {
+        invalidSkipped++;
+        continue;
+      }
+      if (!["easy", "medium", "hard"].includes(difficulty)) {
+        invalidSkipped++;
+        continue;
+      }
 
       const duplicate = await db.query.questions.findFirst({
         where: (q, { and, eq }) => and(eq(q.conceptId, conceptId), eq(q.stem, item.stem)),
       });
-      if (duplicate) continue;
+      if (duplicate) {
+        duplicatesSkipped++;
+        continue;
+      }
 
       const options: QuestionOption[] = item.options.map((option, index) => ({
         key: String(option.key).toUpperCase() as "A" | "B" | "C" | "D",
@@ -160,7 +173,7 @@ export async function POST(req: Request) {
       extractedText,
       processingNotes:
         uploadType === "question_bank"
-          ? `${questionsExtracted} questions extracted`
+          ? `${questionsParsed} parsed, ${questionsExtracted} added, ${duplicatesSkipped} duplicates skipped, ${invalidSkipped} invalid skipped`
           : `Study material saved. ${extractedText ? "Text extracted for targeted remediation." : "No text could be extracted."}`,
     })
     .where(eq(uploads.id, upload.id));
@@ -169,9 +182,12 @@ export async function POST(req: Request) {
     success: true,
     message:
       uploadType === "question_bank"
-        ? `${questionsExtracted} questions extracted and added`
+        ? `${questionsParsed} questions parsed. ${questionsExtracted} new added${duplicatesSkipped ? `, ${duplicatesSkipped} already existed` : ""}${invalidSkipped ? `, ${invalidSkipped} skipped as invalid` : ""}.`
         : "Study material uploaded and indexed for targeted remediation",
     questionsExtracted: uploadType === "question_bank" ? questionsExtracted : undefined,
+    questionsParsed: uploadType === "question_bank" ? questionsParsed : undefined,
+    duplicatesSkipped: uploadType === "question_bank" ? duplicatesSkipped : undefined,
+    invalidSkipped: uploadType === "question_bank" ? invalidSkipped : undefined,
     uploadId: upload.id,
     storagePath: upload.storagePath,
     fileFormat: format,
